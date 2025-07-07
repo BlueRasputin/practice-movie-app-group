@@ -33,6 +33,28 @@ public class MovieController {
         return ResponseEntity.status(HttpStatus.CREATED).body(movieRepository.save(newMovie));
     }
 
+    @GetMapping("/html")
+    public String getMoviesHtml() {
+        String movieList = "<ul>";
+        List<Movie> movies = movieRepository.findAll();
+        for (Movie movie : movies) {
+            movieList += "<li>" + movie + "</li>";
+        }
+        movieList += "</ul>";
+
+        return """
+                <html>
+                    <body>
+                        <h1>Movies</h1>
+                        <ul>
+                """ +
+                movieList +
+                """
+                        </ul>
+                    </body>
+                """;
+    }
+
     public String generateDescription(Movie movie) {
         String query = "Give a description of this movie in one sentence: " + movie.getTitle() + ", " + movie.getYear();
         GenerateContentResponse response =

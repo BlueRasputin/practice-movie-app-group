@@ -55,6 +55,48 @@ public class MovieController {
                 """;
     }
 
+    @GetMapping("/add")
+    public String renderAddMovieForm() {
+        return """
+                <html>
+                <body>
+                <form action='/movies/add' method='POST'>
+                <p>Enter the movie title, year, and rating:</p>
+                <input type='text' name='title' placeholder='Title' />
+                <input type='text' name='year' placeholder='Year' />
+                <input type='text' name='rating' placeholder='Rating' />
+                <button type='submit'>Submit</button>
+                </form>
+                </body>
+                </html>
+                """;
+    }
+
+    @PostMapping("/add")
+    public String processAddMovieForm(
+            @RequestParam(value="title") String title,
+            @RequestParam(value="year") int year,
+            @RequestParam(value="rating") double rating
+            ) {
+        Movie newMovie = new Movie();
+        newMovie.setTitle(title);
+        newMovie.setYear(year);
+        newMovie.setRating(rating);
+        newMovie.setDescription(generateDescription(newMovie));
+        movieRepository.save(newMovie);
+        return """
+                <html>
+                <body>
+                <h3>MOVIE ADDED</h3>
+                """ +
+                "<p>You have successfully added " + title + " to the collection.</p>" +
+                """
+                <p>View the <a href='/movies/html'>updated list</a> of movies.</p>
+                </body>
+                </html>
+                """;
+    }
+
     public String generateDescription(Movie movie) {
         String query = "Give a description of this movie in one sentence: " + movie.getTitle() + ", " + movie.getYear();
         GenerateContentResponse response =

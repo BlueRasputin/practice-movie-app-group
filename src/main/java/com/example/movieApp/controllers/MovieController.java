@@ -2,6 +2,7 @@ package com.example.movieApp.controllers;
 
 import com.example.movieApp.models.Movie;
 import com.example.movieApp.services.MovieService;
+import com.google.genai.types.GenerateContentResponse;
 import org.apache.coyote.BadRequestException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -29,7 +30,7 @@ public class MovieController {
         int year = newMovie.getYear();
         double rating = newMovie.getRating();
         // error handling?
-        return ResponseEntity.status(HttpStatus.CREATED).body(movieService.createMovie(title,year,rating));
+        return ResponseEntity.status(HttpStatus.CREATED).body(movieService.createMovie(title,year));
     }
 
     @GetMapping
@@ -61,10 +62,9 @@ public class MovieController {
                 <html>
                 <body>
                 <form action='/movies/add' method='POST'>
-                <p>Enter the movie title, year, and rating:</p>
+                <p>Enter the movie title and year:</p>
                 <input type='text' name='title' placeholder='Title' /> <br>
                 <input type='text' name='year' placeholder='Year' /> <br>
-                <input type='text' name='rating' placeholder='Rating' /> <br>
                 <button type='submit'>Submit</button>
                 </form>
                 <p><a href='/movies'>View the movie list</a></p>
@@ -76,15 +76,14 @@ public class MovieController {
     @PostMapping("/add")
     public String processAddMovieForm(
             @RequestParam(value="title") String title,
-            @RequestParam(value="year") int year,
-            @RequestParam(value="rating") double rating
+            @RequestParam(value="year") int year
             ) throws BadRequestException {
         // Validate input
         if (title.isEmpty()) {
             throw new BadRequestException("The fields cannot be blank");
         }
         // error handling?
-        movieService.createMovie(title, year, rating);
+        movieService.createMovie(title, year);
         return """
                 <html>
                 <body>

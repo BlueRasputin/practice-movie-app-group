@@ -22,11 +22,12 @@ public class MovieService {
         return movieRepository.findAll();
     }
 
-    public Movie createMovie(String title, int year, double rating) {
+    public Movie createMovie(String title, int year) {
         Movie newMovie = new Movie();
         newMovie.setTitle(title);
         newMovie.setYear(year);
-        newMovie.setRating(rating);
+
+        newMovie.setRating(generateRating(newMovie));
         newMovie.setDescription(generateDescription(newMovie));
         return movieRepository.save(newMovie);
     }
@@ -39,5 +40,15 @@ public class MovieService {
                         query,
                         null);
         return response.text();
+    }
+
+    public double generateRating(Movie movie) {
+        String query = "Give me the rotten tomatoes rating for the movie " + movie.getTitle() + " as a percentage, only numbers, no text";
+        GenerateContentResponse response =
+                client.models.generateContent(
+                        "gemini-2.0-flash-001",
+                        query,
+                        null);
+        return Double.parseDouble(response.text());
     }
 }

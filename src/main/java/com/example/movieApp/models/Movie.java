@@ -73,4 +73,8 @@ public class Movie {
                 ", rating: " + rating +
                 ", description: '" + description + '\'';
     }
+
+    public String toHtml() {
+        return "<p style='font-weight: bold;'>" + title + ", " + year + ", rating: " + rating + "</p><p>" + description + "</p>";
+    }
 }

@@ -1,10 +1,8 @@
 package com.example.movieApp.controllers;
 
 import com.example.movieApp.models.Movie;
-import com.example.movieApp.repositories.MovieRepository;
 import com.example.movieApp.services.MovieService;
-import com.google.genai.Client;
-import com.google.genai.types.GenerateContentResponse;
+import org.apache.coyote.BadRequestException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -20,25 +18,26 @@ public class MovieController {
         this.movieService = movieService;
     }
 
-    @GetMapping
+    @GetMapping("/api")
     public ResponseEntity<List<Movie>> getAllMovies() {
         return ResponseEntity.status(HttpStatus.OK).body(movieService.getAllMovies());
     }
 
-    @PostMapping
+    @PostMapping("/api")
     public ResponseEntity<Movie> addMovie(@RequestBody Movie newMovie) {
         String title = newMovie.getTitle();
         int year = newMovie.getYear();
         double rating = newMovie.getRating();
+        // error handling?
         return ResponseEntity.status(HttpStatus.CREATED).body(movieService.createMovie(title,year,rating));
     }
 
-    @GetMapping("/html")
+    @GetMapping
     public String getMoviesHtml() {
         String movieList = "<ul>";
         List<Movie> movies = movieService.getAllMovies();
         for (Movie movie : movies) {
-            movieList += "<li>" + movie + "</li>";
+            movieList += "<li>" + movie.toHtml() + "</li>";
         }
         movieList += "</ul>";
 
@@ -51,6 +50,7 @@ public class MovieController {
                 movieList +
                 """
                         </ul>
+                        <p><a href='/movies/add'>Add a movie</a></p>
                     </body>
                 """;
     }
@@ -62,11 +62,12 @@ public class MovieController {
                 <body>
                 <form action='/movies/add' method='POST'>
                 <p>Enter the movie title, year, and rating:</p>
-                <input type='text' name='title' placeholder='Title' />
-                <input type='text' name='year' placeholder='Year' />
-                <input type='text' name='rating' placeholder='Rating' />
+                <input type='text' name='title' placeholder='Title' /> <br>
+                <input type='text' name='year' placeholder='Year' /> <br>
+                <input type='text' name='rating' placeholder='Rating' /> <br>
                 <button type='submit'>Submit</button>
                 </form>
+                <p><a href='/movies'>View the movie list</a></p>
                 </body>
                 </html>
                 """;
@@ -77,7 +78,12 @@ public class MovieController {
             @RequestParam(value="title") String title,
             @RequestParam(value="year") int year,
             @RequestParam(value="rating") double rating
-            ) {
+            ) throws BadRequestException {
+        // Validate input
+        if (title.isEmpty()) {
+            throw new BadRequestException("The fields cannot be blank");
+        }
+        // error handling?
         movieService.createMovie(title, year, rating);
         return """
                 <html>
@@ -86,7 +92,8 @@ public class MovieController {
                 """ +
                 "<p>You have successfully added " + title + " to the collection.</p>" +
                 """
-                <p>View the <a href='/movies/html'>updated list</a> of movies.</p>
+                <p><a href='/movies'>View the updated movie list</a></p>
+                <p><a href='/movies/add'>Add another movie</a></p>
                 </body>
                 </html>
                 """;
